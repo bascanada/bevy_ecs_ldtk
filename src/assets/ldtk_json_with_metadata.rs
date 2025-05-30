@@ -455,7 +455,7 @@ pub mod tests {
             },
             LevelIid,
         };
-        use fake::{Fake, Faker};
+        use fake::{uuid::UUIDv4, Fake, Faker};
 
         impl<F> Dummy<LdtkJsonWithMetadataFaker<F>> for LdtkJsonWithMetadata<ExternalLevels>
         where
@@ -475,7 +475,9 @@ pub mod tests {
                             level.iid.clone(),
                             ExternalLevelMetadata::new(
                                 LevelMetadata::new(None, LevelIndices::in_root(i)),
-                                Handle::weak_from_u128(Faker.fake()),
+                                Handle::Weak(AssetId::Uuid {
+                                    uuid: UUIDv4.fake(),
+                                }),
                             ),
                         )
                     })
@@ -515,7 +517,7 @@ pub mod tests {
                 .fake();
 
             let mut assets = app
-                .world
+                .world_mut()
                 .get_resource_mut::<Assets<LdtkExternalLevel>>()
                 .unwrap();
 
@@ -591,7 +593,7 @@ pub mod tests {
             assert_eq!(
                 project
                     .iter_external_levels(
-                        app.world
+                        app.world()
                             .get_resource::<Assets<LdtkExternalLevel>>()
                             .unwrap()
                     )
@@ -601,7 +603,7 @@ pub mod tests {
 
             for (external_level, expected_level) in project
                 .iter_external_levels(
-                    app.world
+                    app.world()
                         .get_resource::<Assets<LdtkExternalLevel>>()
                         .unwrap(),
                 )
@@ -617,7 +619,7 @@ pub mod tests {
             let project = fake_and_load_ldtk_json_with_metadata(&mut app);
 
             let assets = app
-                .world
+                .world()
                 .get_resource::<Assets<LdtkExternalLevel>>()
                 .unwrap();
 
@@ -647,7 +649,7 @@ pub mod tests {
             let project = fake_and_load_ldtk_json_with_metadata(&mut app);
 
             let assets = app
-                .world
+                .world()
                 .get_resource::<Assets<LdtkExternalLevel>>()
                 .unwrap();
 
@@ -676,7 +678,7 @@ pub mod tests {
             let project = fake_and_load_ldtk_json_with_metadata(&mut app);
 
             let assets = app
-                .world
+                .world()
                 .get_resource::<Assets<LdtkExternalLevel>>()
                 .unwrap();
 

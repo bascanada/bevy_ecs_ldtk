@@ -1,5 +1,56 @@
 # Changelog
 
+## [0.12.0](https://github.com/Trouv/bevy_ecs_ldtk/compare/v0.11.0...v0.12.0) (2025-05-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade to bevy and bevy_ecs_tilemap 0.16 ([#357](https://github.com/Trouv/bevy_ecs_ldtk/issues/357))
+
+### Features
+
+* upgrade to bevy and bevy_ecs_tilemap 0.16 ([#357](https://github.com/Trouv/bevy_ecs_ldtk/issues/357)) ([2ab5671](https://github.com/Trouv/bevy_ecs_ldtk/commit/2ab5671d33f4a48e83bd8836e506ed43744c3102))
+
+
+### Documentation Changes
+
+* document spacing and padding limitations [#94](https://github.com/Trouv/bevy_ecs_ldtk/issues/94) ([#351](https://github.com/Trouv/bevy_ecs_ldtk/issues/351)) ([ba9c7f0](https://github.com/Trouv/bevy_ecs_ldtk/commit/ba9c7f01dcb8ddbf2bd3c24579d59c9fe78e2568))
+
+## [0.11.0](https://github.com/Trouv/bevy_ecs_ldtk/compare/v0.10.0...v0.11.0) (2024-12-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade to bevy and bevy_ecs_tilemap 0.15 ([#340](https://github.com/Trouv/bevy_ecs_ldtk/issues/340))
+
+### Features
+
+* upgrade to bevy and bevy_ecs_tilemap 0.15 ([#340](https://github.com/Trouv/bevy_ecs_ldtk/issues/340)) ([f44a281](https://github.com/Trouv/bevy_ecs_ldtk/commit/f44a2814faf3f200232800aeb9e67f7c85f7278e))
+
+
+### Documentation Changes
+
+* refactor platformer example by topic ([#329](https://github.com/Trouv/bevy_ecs_ldtk/issues/329)) ([f59e5e5](https://github.com/Trouv/bevy_ecs_ldtk/commit/f59e5e588026922620c1981108828e1e3ae6153f))
+
+## [0.10.0](https://github.com/Trouv/bevy_ecs_ldtk/compare/v0.9.0...v0.10.0) (2024-07-20)
+
+
+### ⚠ BREAKING CHANGES
+
+* upgrade to bevy and bevy_ecs_ldtk 0.14 ([#325](https://github.com/Trouv/bevy_ecs_ldtk/issues/325))
+* upgrade to bevy 0.13 ([#302](https://github.com/Trouv/bevy_ecs_ldtk/issues/302))
+
+### Features
+
+* add #[default] attribute to LdtkEntity and LdtkIntCell derive macros ([#306](https://github.com/Trouv/bevy_ecs_ldtk/issues/306)) ([416a46e](https://github.com/Trouv/bevy_ecs_ldtk/commit/416a46ea832ad85fe852abc3fd3a46e05a1550b7))
+* upgrade to bevy 0.13 ([#302](https://github.com/Trouv/bevy_ecs_ldtk/issues/302)) ([2ee602f](https://github.com/Trouv/bevy_ecs_ldtk/commit/2ee602ff46969d58f4a22db34c2ea4e42c6cac75)), closes [#301](https://github.com/Trouv/bevy_ecs_ldtk/issues/301)
+* upgrade to bevy and bevy_ecs_ldtk 0.14 ([#325](https://github.com/Trouv/bevy_ecs_ldtk/issues/325)) ([d888535](https://github.com/Trouv/bevy_ecs_ldtk/commit/d888535e4c57147f60dd0de6878ada0c8fe8611e))
+
+
+### Documentation Changes
+
+* remove unused AssetServer param in *Game logic integration* chapter ([#318](https://github.com/Trouv/bevy_ecs_ldtk/issues/318)) ([617b108](https://github.com/Trouv/bevy_ecs_ldtk/commit/617b108dfc22799047cdb4d2c84c3cdfba7e985a))
+
 ## [0.9.0](https://github.com/Trouv/bevy_ecs_ldtk/compare/v0.8.0...v0.9.0) (2024-02-11)
 
 

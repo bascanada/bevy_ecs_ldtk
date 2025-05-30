@@ -15,7 +15,7 @@ use crate::{
 #[cfg(feature = "external_levels")]
 use crate::assets::LdtkExternalLevel;
 
-use bevy::{asset::RecursiveDependencyLoadState, ecs::system::SystemState, prelude::*};
+use bevy::{ecs::system::SystemState, prelude::*};
 use std::collections::{HashMap, HashSet};
 
 /// Detects [LdtkProject] events and spawns levels as children of the [LdtkWorldBundle].
@@ -23,7 +23,7 @@ use std::collections::{HashMap, HashSet};
 pub fn process_ldtk_assets(
     mut commands: Commands,
     mut ldtk_project_events: EventReader<AssetEvent<LdtkProject>>,
-    ldtk_world_query: Query<(Entity, &Handle<LdtkProject>)>,
+    ldtk_world_query: Query<(Entity, &LdtkProjectHandle)>,
     #[cfg(feature = "render")] ldtk_settings: Res<LdtkSettings>,
     #[cfg(feature = "render")] mut clear_color: ResMut<ClearColor>,
     #[cfg(feature = "render")] ldtk_project_assets: Res<Assets<LdtkProject>>,
@@ -73,7 +73,7 @@ pub fn apply_level_selection(
     level_selection: Option<Res<LevelSelection>>,
     ldtk_settings: Res<LdtkSettings>,
     ldtk_project_assets: Res<Assets<LdtkProject>>,
-    mut level_set_query: Query<(&Handle<LdtkProject>, &mut LevelSet)>,
+    mut level_set_query: Query<(&LdtkProjectHandle, &mut LevelSet)>,
     #[cfg(feature = "render")] mut clear_color: ResMut<ClearColor>,
 ) {
     if let Some(level_selection) = level_selection {
@@ -123,7 +123,7 @@ pub fn apply_level_set(
         Entity,
         &LevelSet,
         Option<&Children>,
-        &Handle<LdtkProject>,
+        &LdtkProjectHandle,
         Option<&Respawn>,
     )>,
     ldtk_level_query: Query<(&LevelIid, Entity)>,
@@ -138,7 +138,7 @@ pub fn apply_level_set(
             if let Some(load_state) =
                 asset_server.get_recursive_dependency_load_state(ldtk_asset_handle)
             {
-                if load_state != RecursiveDependencyLoadState::Loaded {
+                if !load_state.is_loaded() {
                     continue;
                 }
             }
@@ -146,7 +146,7 @@ pub fn apply_level_set(
             let previous_level_maps = children
                 .into_iter()
                 .flat_map(|iterator| iterator.iter())
-                .filter_map(|child_entity| ldtk_level_query.get(*child_entity).ok())
+                .filter_map(|child_entity| ldtk_level_query.get(child_entity).ok())
                 .map(|(level_iid, entity)| (level_iid.clone(), entity))
                 .collect::<HashMap<_, _>>();
 
@@ -159,20 +159,21 @@ pub fn apply_level_set(
                 .difference(&previous_iids)
                 .filter_map(|&iid| project.get_raw_level_by_iid(iid.get()))
                 .map(|level| {
-                    level_events.send(LevelEvent::SpawnTriggered(LevelIid::new(level.iid.clone())));
+                    level_events
+                        .write(LevelEvent::SpawnTriggered(LevelIid::new(level.iid.clone())));
                     pre_spawn_level(&mut commands, level, &ldtk_settings)
                 })
                 .collect::<Vec<_>>();
 
-            commands.entity(world_entity).push_children(&spawned_levels);
+            commands.entity(world_entity).add_children(&spawned_levels);
 
             // Despawn levels that shouldn't be spawned but are
             for &iid in previous_iids.difference(&level_set_as_ref) {
                 let map_entity = previous_level_maps.get(iid).expect(
                 "The set of previous_iids and the keys in previous_level_maps should be the same.",
             );
-                commands.entity(*map_entity).despawn_recursive();
-                level_events.send(LevelEvent::Despawned(iid.clone()));
+                commands.entity(*map_entity).despawn();
+                level_events.write(LevelEvent::Despawned(iid.clone()));
             }
 
             // If the world was empty before but has now been populated, and this world was
@@ -201,10 +202,8 @@ fn pre_spawn_level(commands: &mut Commands, level: &Level, ldtk_settings: &LdtkS
 
     commands
         .spawn(LevelIid::new(level.iid.clone()))
-        .insert(SpatialBundle {
-            transform: Transform::from_translation(translation),
-            ..default()
-        })
+        .insert(Transform::from_translation(translation))
+        .insert(Visibility::default())
         .insert(Name::new(level.identifier.clone()))
         .id()
 }
@@ -221,12 +220,12 @@ pub fn process_ldtk_levels(
     #[cfg(feature = "external_levels")] level_assets: Res<Assets<LdtkExternalLevel>>,
     ldtk_entity_map: NonSend<LdtkEntityMap>,
     ldtk_int_cell_map: NonSend<LdtkIntCellMap>,
-    ldtk_query: Query<&Handle<LdtkProject>>,
+    ldtk_query: Query<&LdtkProjectHandle>,
     level_query: Query<
         (
             Entity,
             &LevelIid,
-            &Parent,
+            &ChildOf,
             Option<&Respawn>,
             Option<&Children>,
         ),
@@ -236,7 +235,7 @@ pub fn process_ldtk_levels(
     mut level_events: EventWriter<LevelEvent>,
     ldtk_settings: Res<LdtkSettings>,
 ) {
-    for (ldtk_entity, level_iid, parent, respawn, children) in level_query.iter() {
+    for (ldtk_entity, level_iid, child_of, respawn, children) in level_query.iter() {
         // Checking if the level has any children is an okay method of checking whether it has
         // already been processed.
         // Users will most likely not be adding children to the level entity betwen its creation
@@ -249,7 +248,7 @@ pub fn process_ldtk_levels(
         let already_processed = matches!(children, Some(children) if !children.is_empty());
 
         if !already_processed {
-            if let Ok(ldtk_handle) = ldtk_query.get(parent.get()) {
+            if let Ok(ldtk_handle) = ldtk_query.get(child_of.parent()) {
                 if let Some(ldtk_project) = ldtk_project_assets.get(ldtk_handle) {
                     // Commence the spawning
                     let tileset_definition_map: HashMap<i32, &TilesetDefinition> = ldtk_project
@@ -314,7 +313,7 @@ pub fn process_ldtk_levels(
                             ldtk_entity,
                             &ldtk_settings,
                         );
-                        level_events.send(LevelEvent::Spawned(LevelIid::new(
+                        level_events.write(LevelEvent::Spawned(LevelIid::new(
                             loaded_level.iid().clone(),
                         )));
                     }
@@ -336,7 +335,7 @@ pub fn process_ldtk_levels(
 pub fn clean_respawn_entities(world: &mut World) {
     #[allow(clippy::type_complexity)]
     let mut system_state: SystemState<(
-        Query<&Children, (With<Handle<LdtkProject>>, With<Respawn>)>,
+        Query<&Children, (With<LdtkProjectHandle>, With<Respawn>)>,
         Query<(Entity, &LevelIid), With<Respawn>>,
         Query<&LevelIid, Without<Respawn>>,
         Query<Entity, With<Worldly>>,
@@ -358,12 +357,12 @@ pub fn clean_respawn_entities(world: &mut World) {
         for world_children in ldtk_worlds_to_clean.iter() {
             for child in world_children
                 .iter()
-                .filter(|l| other_ldtk_levels.contains(**l) || worldly_entities.contains(**l))
+                .filter(|l| other_ldtk_levels.contains(*l) || worldly_entities.contains(*l))
             {
-                entities_to_despawn_recursively.push(*child);
+                entities_to_despawn_recursively.push(child);
 
-                if let Ok(level_iid) = other_ldtk_levels.get(*child) {
-                    level_events.send(LevelEvent::Despawned(level_iid.clone()));
+                if let Ok(level_iid) = other_ldtk_levels.get(child) {
+                    level_events.write(LevelEvent::Despawned(level_iid.clone()));
                 }
             }
         }
@@ -371,23 +370,23 @@ pub fn clean_respawn_entities(world: &mut World) {
         for (level_entity, level_iid) in ldtk_levels_to_clean.iter() {
             entities_to_despawn_descendants.push(level_entity);
 
-            level_events.send(LevelEvent::Despawned(level_iid.clone()));
+            level_events.write(LevelEvent::Despawned(level_iid.clone()));
         }
     }
 
     for entity in entities_to_despawn_recursively {
-        world.entity_mut(entity).despawn_recursive();
+        world.entity_mut(entity).despawn();
     }
 
     for entity in entities_to_despawn_descendants {
-        world.entity_mut(entity).despawn_descendants();
+        world.entity_mut(entity).despawn_related::<Children>();
     }
 }
 
 /// Implements the functionality for `Worldly` components.
 pub fn worldly_adoption(
     mut commands: Commands,
-    ancestors: Query<&Parent>,
+    ancestors: Query<&ChildOf>,
     worldly_query: Query<Entity, Added<Worldly>>,
 ) {
     for worldly_entity in worldly_query.iter() {
@@ -427,6 +426,6 @@ pub fn fire_level_transformed_events(
     mut writer: EventWriter<LevelEvent>,
 ) {
     for id in spawned_ids {
-        writer.send(LevelEvent::Transformed(id));
+        writer.write(LevelEvent::Transformed(id));
     }
 }

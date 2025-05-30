@@ -4,15 +4,15 @@
 //! ## This API Reference
 //! The purpose of this API reference is to describe the API provided by this plugin.
 //! More explanation-oriented documentation, tutorials, and guides are available in the
-//! [`bevy_ecs_ldtk` book](https://trouv.github.io/bevy_ecs_ldtk/v0.9.0). <!-- x-release-please-version -->
+//! [`bevy_ecs_ldtk` book](https://trouv.github.io/bevy_ecs_ldtk/v0.12.0). <!-- x-release-please-version -->
 //!
 //! The following chapters are good jumping-off points for beginners:
-//! - [*Tile-based Game* tutorial](https://trouv.github.io/bevy_ecs_ldtk/v0.9.0/tutorials/tile-based-game/index.html) <!-- x-release-please-version -->
-//! - [*Level Selection* explanation](https://trouv.github.io/bevy_ecs_ldtk/v0.9.0/explanation/level-selection.html) <!-- x-release-please-version -->
-//! - [*Game Logic Integration* explanation](https://trouv.github.io/bevy_ecs_ldtk/v0.9.0/explanation/game-logic-integration.html) <!-- x-release-please-version -->
+//! - [*Tile-based Game* tutorial](https://trouv.github.io/bevy_ecs_ldtk/v0.12.0/tutorials/tile-based-game/index.html) <!-- x-release-please-version -->
+//! - [*Level Selection* explanation](https://trouv.github.io/bevy_ecs_ldtk/v0.12.0/explanation/level-selection.html) <!-- x-release-please-version -->
+//! - [*Game Logic Integration* explanation](https://trouv.github.io/bevy_ecs_ldtk/v0.12.0/explanation/game-logic-integration.html) <!-- x-release-please-version -->
 //!
 //! Cargo examples are also available in this plugin's
-//! [github repository](https://github.com/Trouv/bevy_ecs_ldtk/tree/v0.9.0/examples). <!-- x-release-please-version -->
+//! [github repository](https://github.com/Trouv/bevy_ecs_ldtk/tree/v0.12.0/examples). <!-- x-release-please-version -->
 //!
 //! ## Feature flags
 //!
@@ -60,8 +60,8 @@ pub mod prelude {
         app::{LdtkEntity, LdtkEntityAppExt, LdtkIntCell, LdtkIntCellAppExt},
         assets::{LdtkProject, LevelIndices, LevelMetadataAccessor},
         components::{
-            EntityIid, EntityInstance, GridCoords, IntGridCell, LayerMetadata, LdtkWorldBundle,
-            LevelIid, LevelSet, Respawn, TileEnumTags, TileMetadata, Worldly,
+            EntityIid, EntityInstance, GridCoords, IntGridCell, LayerMetadata, LdtkProjectHandle,
+            LdtkWorldBundle, LevelIid, LevelSet, Respawn, TileEnumTags, TileMetadata, Worldly,
         },
         ldtk::{
             self, ldtk_fields::LdtkFields, raw_level_accessor::RawLevelAccessor, FieldValue,

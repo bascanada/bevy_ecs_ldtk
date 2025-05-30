@@ -14,8 +14,8 @@ pub struct EnemyBundle {
     equipment_drops: EquipmentDrops,
     #[with(UnresolvedMotherRef::from_mother_field)]
     unresolved_mother: UnresolvedMotherRef,
-    #[sprite_sheet_bundle]
-    sprite_sheet_bundle: SpriteSheetBundle,
+    #[sprite_sheet]
+    sprite_sheet: Sprite,
 }
 
 fn name_from_field(entity_instance: &EntityInstance) -> Name {
